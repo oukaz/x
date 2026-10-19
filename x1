@@ -1,6 +1,7 @@
 local players = game:GetService("Players")
 local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
+local camera = workspace.CurrentCamera
 local localPlayer = players.LocalPlayer
 
 local v1 = {
@@ -8,6 +9,7 @@ local v1 = {
   Chams = false,
   NameESP = false,
   HeadDot = false,
+  HealthBar = false,
   HealthChams = false,
   TeamCheck = false,
   MainColor = Color3.fromRGB(255, 0, 0),
@@ -19,7 +21,7 @@ universalESPNoLagAyz.Name = "UniversalESP_NoLag_ayz"
 universalESPNoLagAyz.ResetOnSpawn = false
 
 local instance = Instance.new("Frame", universalESPNoLagAyz)
-instance.Size = UDim2.new(0, 210, 0, 450)
+instance.Size = UDim2.new(0, 210, 0, 480)
 instance.Position = UDim2.new(0.05, 0, 0.25, 0)
 instance.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 instance.BorderSizePixel = 0
@@ -83,17 +85,18 @@ makeTextButton("Corner ESP", 70, "BoxESP")
 makeTextButton("Chams", 105, "Chams")
 makeTextButton("Name ESP", 140, "NameESP")
 makeTextButton("Head Dot", 175, "HeadDot")
+makeTextButton("Health Bar", 210, "HealthBar")
 
-makeTextLabel("SETTINGS", 220)
+makeTextLabel("SETTINGS", 255)
 
-makeTextButton("Health Based", 245, "HealthChams")
-makeTextButton("Team Check", 280, "TeamCheck")
+makeTextButton("Health Based", 280, "HealthChams")
+makeTextButton("Team Check", 315, "TeamCheck")
 
-makeTextLabel("COLORS", 325)
+makeTextLabel("COLORS", 360)
 
 local instance6 = Instance.new("Frame", instance)
 instance6.Size = UDim2.new(0.9, 0, 0, 65)
-instance6.Position = UDim2.new(0.05, 0, 0, 345)
+instance6.Position = UDim2.new(0.05, 0, 0, 380)
 instance6.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 
 Instance.new("UICorner", instance6)
@@ -216,7 +219,7 @@ userInputService.InputEnded:Connect(function(input4)
   end
 end)
 
--- Unified Press-To-Bind and Menu Toggle (Fixed)
+-- Unified Press-To-Bind and Menu Toggle
 userInputService.InputBegan:Connect(function(input5, gameProcessed)
   if bindingActive then
     if input5.UserInputType == Enum.UserInputType.Keyboard then
@@ -258,6 +261,10 @@ local function makeFrame(cornerGui)
 end
 
 runService.RenderStepped:Connect(function()
+  -- Calculate FOV scale factor to prevent culling/disappearing when zooming in with gun scopes
+  local fovScale = math.clamp(camera.FieldOfView / 70, 0.1, 1)
+  local dynamicGuiSize = UDim2.new(4 * fovScale, 0, 5.5 * fovScale, 0)
+
   for _, value in pairs(players:GetPlayers()) do
     if value ~= localPlayer then
       local character = value.Character
@@ -268,7 +275,7 @@ runService.RenderStepped:Connect(function()
             character.ESP_Folder:Destroy()
           end
         else
-          local humanoid = character:FindFirstChild("Humanoid")
+          local humanoid = character:FindFirstChildOfClass("Humanoid")
           local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
           if humanoid and humanoidRootPart and humanoid.Health > 0 then
@@ -309,11 +316,14 @@ runService.RenderStepped:Connect(function()
                 cornerGui2 = Instance.new("BillboardGui", espFolder)
                 cornerGui2.Name = "CornerGui"
                 cornerGui2.Adornee = humanoidRootPart
-                cornerGui2.Size = UDim2.new(4, 0, 5.5, 0)
+                cornerGui2.Size = dynamicGuiSize
                 cornerGui2.AlwaysOnTop = true
+                cornerGui2.LightInfluence = 0
 
                 makeFrame(cornerGui2)
               else
+                cornerGui2.Adornee = humanoidRootPart
+                cornerGui2.Size = dynamicGuiSize
                 for _, element in pairs(cornerGui2:GetDescendants()) do
                   if element:IsA("Frame") and element.Name == "BoxLine" then
                     element.BackgroundColor3 = v1.MainColor
@@ -322,6 +332,49 @@ runService.RenderStepped:Connect(function()
               end
             elseif espFolder:FindFirstChild("CornerGui") then
               espFolder.CornerGui:Destroy()
+            end
+
+            -- Health Bar ESP
+            if v1.HealthBar then
+              local healthBarGui = espFolder:FindFirstChild("HealthBarGui")
+              if not healthBarGui then
+                healthBarGui = Instance.new("BillboardGui", espFolder)
+                healthBarGui.Name = "HealthBarGui"
+                healthBarGui.Adornee = humanoidRootPart
+                healthBarGui.Size = dynamicGuiSize
+                healthBarGui.AlwaysOnTop = true
+                healthBarGui.LightInfluence = 0
+
+                local bgBar = Instance.new("Frame", healthBarGui)
+                bgBar.Name = "BgBar"
+                bgBar.Size = UDim2.new(0, 4, 1, 0)
+                bgBar.Position = UDim2.new(-0.18, 0, 0, 0)
+                bgBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                bgBar.BorderSizePixel = 0
+                Instance.new("UICorner", bgBar).CornerRadius = UDim.new(0, 1)
+
+                local fillBar = Instance.new("Frame", bgBar)
+                fillBar.Name = "FillBar"
+                fillBar.Size = UDim2.new(1, 0, 1, 0)
+                fillBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+                fillBar.BorderSizePixel = 0
+                Instance.new("UICorner", fillBar).CornerRadius = UDim.new(0, 1)
+              end
+
+              healthBarGui.Adornee = humanoidRootPart
+              healthBarGui.Size = dynamicGuiSize
+              local bgBar = healthBarGui:FindFirstChild("BgBar")
+              if bgBar then
+                local fillBar = bgBar:FindFirstChild("FillBar")
+                if fillBar then
+                  local healthPercent = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+                  fillBar.Size = UDim2.new(1, 0, healthPercent, 0)
+                  fillBar.Position = UDim2.new(0, 0, 1 - healthPercent, 0)
+                  fillBar.BackgroundColor3 = Color3.fromHSV(healthPercent * 0.35, 1, 1)
+                end
+              end
+            elseif espFolder:FindFirstChild("HealthBarGui") then
+              espFolder.HealthBarGui:Destroy()
             end
 
             -- Head Dot ESP
@@ -335,6 +388,7 @@ runService.RenderStepped:Connect(function()
                   headDotGui.Adornee = head
                   headDotGui.Size = UDim2.new(0, 6, 0, 6)
                   headDotGui.AlwaysOnTop = true
+                  headDotGui.LightInfluence = 0
 
                   local dotFrame = Instance.new("Frame", headDotGui)
                   dotFrame.Name = "Dot"
@@ -364,6 +418,7 @@ runService.RenderStepped:Connect(function()
                 nameGui.Size = UDim2.new(0, 100, 0, 20)
                 nameGui.StudsOffset = Vector3.new(0, -3.5, 0)
                 nameGui.AlwaysOnTop = true
+                nameGui.LightInfluence = 0
 
                 local nameText = Instance.new("TextLabel", nameGui)
                 nameText.Name = "NameText"
@@ -375,6 +430,7 @@ runService.RenderStepped:Connect(function()
                 nameText.TextSize = 11
                 nameText.TextStrokeTransparency = 0.5
               else
+                nameGui.Adornee = humanoidRootPart
                 local nameText = nameGui:FindFirstChild("NameText")
                 if nameText then
                   nameText.TextColor3 = v1.MainColor
