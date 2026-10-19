@@ -1,0 +1,393 @@
+local players = game:GetService("Players")
+local runService = game:GetService("RunService")
+local userInputService = game:GetService("UserInputService")
+local localPlayer = players.LocalPlayer
+
+local v1 = {
+  BoxESP = false,
+  Chams = false,
+  NameESP = false,
+  HeadDot = false,
+  HealthChams = false,
+  TeamCheck = false,
+  MainColor = Color3.fromRGB(255, 0, 0),
+  MenuKey = Enum.KeyCode.RightShift,
+}
+
+local universalESPNoLagAyz = Instance.new("ScreenGui", localPlayer:WaitForChild("PlayerGui"))
+universalESPNoLagAyz.Name = "UniversalESP_NoLag_ayz"
+universalESPNoLagAyz.ResetOnSpawn = false
+
+local instance = Instance.new("Frame", universalESPNoLagAyz)
+instance.Size = UDim2.new(0, 210, 0, 450)
+instance.Position = UDim2.new(0.05, 0, 0.25, 0)
+instance.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+instance.BorderSizePixel = 0
+instance.Active = true
+
+Instance.new("UICorner", instance).CornerRadius = UDim.new(0, 10)
+
+local instance2 = Instance.new("TextLabel", instance)
+instance2.Size = UDim2.new(1, 0, 0, 40)
+instance2.BackgroundTransparency = 1
+instance2.Text = "UNIVERSAL ESP"
+instance2.TextColor3 = Color3.new(1, 1, 1)
+instance2.Font = Enum.Font.GothamBold
+instance2.TextSize = 14
+
+local function makeTextLabel(text, p1)
+  local instance3 = Instance.new("TextLabel", instance)
+  instance3.Size = UDim2.new(0.9, 0, 0, 20)
+  instance3.Position = UDim2.new(0.05, 0, 0, p1)
+  instance3.BackgroundTransparency = 1
+  instance3.Text = text
+  instance3.TextColor3 = Color3.fromRGB(80, 80, 80)
+  instance3.Font = Enum.Font.GothamBold
+  instance3.TextSize = 10
+  instance3.TextXAlignment = Enum.TextXAlignment.Left
+
+  local instance4 = Instance.new("Frame", instance3)
+  instance4.Size = UDim2.new(1, 0, 0, 1)
+  instance4.Position = UDim2.new(0, 0, 1, 0)
+  instance4.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+  instance4.BorderSizePixel = 0
+end
+
+local function makeTextButton(text2, p2, key)
+  local instance5 = Instance.new("TextButton", instance)
+  instance5.Size = UDim2.new(0.9, 0, 0, 30)
+  instance5.Position = UDim2.new(0.05, 0, 0, p2)
+  instance5.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+  instance5.Text = text2 .. ": OFF"
+  instance5.TextColor3 = Color3.fromRGB(180, 180, 180)
+  instance5.Font = Enum.Font.Gotham
+  instance5.TextSize = 11
+
+  Instance.new("UICorner", instance5).CornerRadius = UDim.new(0, 6)
+
+  instance5.MouseButton1Click:Connect(function()
+    v1[key] = not v1[key]
+
+    instance5.Text = text2 .. ": " .. (v1[key] and "ON" or "OFF")
+
+    instance5.BackgroundColor3 = v1[key] and Color3.fromRGB(45, 100, 250)
+      or Color3.fromRGB(25, 25, 25)
+
+    instance5.TextColor3 = v1[key] and Color3.new(1, 1, 1) or Color3.fromRGB(180, 180, 180)
+  end)
+end
+
+makeTextLabel("VISUALS", 45)
+
+makeTextButton("Corner ESP", 70, "BoxESP")
+makeTextButton("Chams", 105, "Chams")
+makeTextButton("Name ESP", 140, "NameESP")
+makeTextButton("Head Dot", 175, "HeadDot")
+
+makeTextLabel("SETTINGS", 220)
+
+makeTextButton("Health Based", 245, "HealthChams")
+makeTextButton("Team Check", 280, "TeamCheck")
+
+makeTextLabel("COLORS", 325)
+
+local instance6 = Instance.new("Frame", instance)
+instance6.Size = UDim2.new(0.9, 0, 0, 65)
+instance6.Position = UDim2.new(0.05, 0, 0, 345)
+instance6.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
+Instance.new("UICorner", instance6)
+
+local function makeTextButton2(text3, color, index, p3)
+  local instance7 = Instance.new("Frame", instance6)
+  instance7.Size = UDim2.new(0.7, 0, 0, 4)
+  instance7.Position = UDim2.new(0.25, 0, 0, index + 8)
+  instance7.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+
+  Instance.new("UICorner", instance7)
+
+  local instance8 = Instance.new("TextLabel", instance6)
+  instance8.Text = text3
+  instance8.Size = UDim2.new(0.15, 0, 0, 20)
+  instance8.Position = UDim2.new(0.05, 0, 0, index)
+  instance8.BackgroundTransparency = 1
+  instance8.TextColor3 = color
+  instance8.Font = Enum.Font.GothamBold
+  instance8.TextSize = 10
+
+  local instance9 = Instance.new("TextButton", instance7)
+  instance9.Size = UDim2.new(0, 10, 0, 10)
+  instance9.Position = UDim2.new(p3 == "R" and v1.MainColor.R or (p3 == "G" and v1.MainColor.G or v1.MainColor.B), -5, 0.5, -5)
+  instance9.BackgroundColor3 = color
+  instance9.Text = ""
+
+  Instance.new("UICorner", instance9).CornerRadius = UDim.new(1, 0)
+  local v2 = false
+  instance9.MouseButton1Down:Connect(function() v2 = true end)
+
+  userInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+      v2 = false
+    end
+  end)
+
+  runService.RenderStepped:Connect(function()
+    if v2 then
+      local v3 = math.clamp((userInputService:GetMouseLocation().X - instance7.AbsolutePosition.X)
+        / instance7.AbsoluteSize.X, 0, 1)
+
+      instance9.Position = UDim2.new(v3, -5, 0.5, -5)
+      local r = p3 == "R" and v3 or v1.MainColor.R
+      local g = p3 == "G" and v3 or v1.MainColor.G
+      local b = p3 == "B" and v3 or v1.MainColor.B
+      
+      v1.MainColor = Color3.new(r, g, b)
+    end
+  end)
+end
+
+makeTextButton2("R", Color3.fromRGB(255, 80, 80), 5, "R")
+makeTextButton2("G", Color3.fromRGB(80, 255, 80), 23, "G")
+makeTextButton2("B", Color3.fromRGB(80, 80, 255), 41, "B")
+
+-- Press-To-Bind UI System
+local keyLabel = Instance.new("TextLabel", instance)
+keyLabel.Size = UDim2.new(0.35, 0, 0, 20)
+keyLabel.Position = UDim2.new(0.05, 0, 1, -25)
+keyLabel.BackgroundTransparency = 1
+keyLabel.Text = "Menu Key:"
+keyLabel.TextColor3 = Color3.fromRGB(120, 120, 120)
+keyLabel.Font = Enum.Font.Gotham
+keyLabel.TextSize = 10
+keyLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local keyButton = Instance.new("TextButton", instance)
+keyButton.Size = UDim2.new(0.4, 0, 0, 18)
+keyButton.Position = UDim2.new(0.35, 0, 1, -24)
+keyButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+keyButton.Text = v1.MenuKey.Name
+keyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyButton.Font = Enum.Font.GothamBold
+keyButton.TextSize = 10
+Instance.new("UICorner", keyButton).CornerRadius = UDim.new(0, 4)
+
+local bindingActive = false
+
+keyButton.MouseButton1Click:Connect(function()
+  bindingActive = true
+  keyButton.Text = "Press key..."
+  keyButton.TextColor3 = Color3.fromRGB(255, 200, 0)
+end)
+
+local creditsLabel = Instance.new("TextLabel", instance)
+creditsLabel.Size = UDim2.new(0.2, 0, 0, 20)
+creditsLabel.Position = UDim2.new(0.95, 0, 1, -5)
+creditsLabel.AnchorPoint = Vector2.new(1, 1)
+creditsLabel.BackgroundTransparency = 1
+creditsLabel.Text = "ayz_7"
+creditsLabel.TextColor3 = Color3.fromRGB(100, 100, 100)
+creditsLabel.Font = Enum.Font.Gotham
+creditsLabel.TextSize = 10
+creditsLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+local v4, position, position2
+
+instance.InputBegan:Connect(function(input2)
+  if input2.UserInputType == Enum.UserInputType.MouseButton1 then
+    v4 = true
+    position = input2.Position
+    position2 = instance.Position
+  end
+end)
+
+userInputService.InputChanged:Connect(function(input3)
+  if v4 and input3.UserInputType == Enum.UserInputType.MouseMovement then
+    local v5 = input3.Position - position
+
+    instance.Position = UDim2.new(
+      position2.X.Scale, position2.X.Offset + v5.X, position2.Y.Scale, position2.Y.Offset + v5.Y
+    )
+  end
+end)
+
+userInputService.InputEnded:Connect(function(input4)
+  if input4.UserInputType == Enum.UserInputType.MouseButton1 then
+    v4 = false
+  end
+end)
+
+-- Unified Press-To-Bind and Menu Toggle (Fixed)
+userInputService.InputBegan:Connect(function(input5, gameProcessed)
+  if bindingActive then
+    if input5.UserInputType == Enum.UserInputType.Keyboard then
+      v1.MenuKey = input5.KeyCode
+      keyButton.Text = input5.KeyCode.Name
+      keyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+      bindingActive = false
+    end
+  else
+    if input5.KeyCode == v1.MenuKey then
+      instance.Visible = not instance.Visible
+    end
+  end
+end)
+
+local function makeFrame(cornerGui)
+  local instance11 = Instance.new("Frame", cornerGui)
+  instance11.Size = UDim2.new(1, 0, 1, 0)
+  instance11.BackgroundTransparency = 1
+
+  local function makeFrame2(udim2, udim3, vector)
+    local instance12 = Instance.new("Frame", instance11)
+    instance12.Name = "BoxLine"
+    instance12.BackgroundColor3 = v1.MainColor
+    instance12.BorderSizePixel = 0
+    instance12.Position = udim2
+    instance12.Size = udim3
+    instance12.AnchorPoint = vector
+  end
+
+  makeFrame2(UDim2.new(0, 0, 0, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(0, 0))
+  makeFrame2(UDim2.new(0, 0, 0, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(0, 0))
+  makeFrame2(UDim2.new(1, 0, 0, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(1, 0))
+  makeFrame2(UDim2.new(1, 0, 0, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(1, 0))
+  makeFrame2(UDim2.new(0, 0, 1, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(0, 1))
+  makeFrame2(UDim2.new(0, 0, 1, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(0, 1))
+  makeFrame2(UDim2.new(1, 0, 1, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(1, 1))
+  makeFrame2(UDim2.new(1, 0, 1, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(1, 1))
+end
+
+runService.RenderStepped:Connect(function()
+  for _, value in pairs(players:GetPlayers()) do
+    if value ~= localPlayer then
+      local character = value.Character
+
+      if character then
+        if v1.TeamCheck and value.Team == localPlayer.Team then
+          if character:FindFirstChild("ESP_Folder") then
+            character.ESP_Folder:Destroy()
+          end
+        else
+          local humanoid = character:FindFirstChild("Humanoid")
+          local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+
+          if humanoid and humanoidRootPart and humanoid.Health > 0 then
+            local espFolder = character:FindFirstChild("ESP_Folder")
+
+            if not espFolder then
+              espFolder = Instance.new("Folder", character)
+              espFolder.Name = "ESP_Folder"
+            end
+
+            -- Chams
+            if v1.Chams then
+              local highlight = espFolder:FindFirstChild("Highlight")
+
+              if not highlight then
+                highlight = Instance.new("Highlight")
+                highlight.Name = "Highlight"
+                highlight.Adornee = character
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.Parent = espFolder
+              end
+
+              highlight.FillColor = v1.HealthChams and Color3.fromHSV(math.clamp(
+                humanoid.Health / humanoid.MaxHealth, 0, 1
+              ) * 0.35, 1, 1) or v1.MainColor
+
+              highlight.OutlineColor = v1.MainColor
+              highlight.FillTransparency = 0.5
+              highlight.OutlineTransparency = 0
+            elseif espFolder:FindFirstChild("Highlight") then
+              espFolder.Highlight:Destroy()
+            end
+
+            -- Corner Box ESP
+            if v1.BoxESP then
+              local cornerGui2 = espFolder:FindFirstChild("CornerGui")
+              if not cornerGui2 then
+                cornerGui2 = Instance.new("BillboardGui", espFolder)
+                cornerGui2.Name = "CornerGui"
+                cornerGui2.Adornee = humanoidRootPart
+                cornerGui2.Size = UDim2.new(4, 0, 5.5, 0)
+                cornerGui2.AlwaysOnTop = true
+
+                makeFrame(cornerGui2)
+              else
+                for _, element in pairs(cornerGui2:GetDescendants()) do
+                  if element:IsA("Frame") and element.Name == "BoxLine" then
+                    element.BackgroundColor3 = v1.MainColor
+                  end
+                end
+              end
+            elseif espFolder:FindFirstChild("CornerGui") then
+              espFolder.CornerGui:Destroy()
+            end
+
+            -- Head Dot ESP
+            if v1.HeadDot then
+              local head = character:FindFirstChild("Head")
+              if head then
+                local headDotGui = espFolder:FindFirstChild("HeadDotGui")
+                if not headDotGui then
+                  headDotGui = Instance.new("BillboardGui", espFolder)
+                  headDotGui.Name = "HeadDotGui"
+                  headDotGui.Adornee = head
+                  headDotGui.Size = UDim2.new(0, 6, 0, 6)
+                  headDotGui.AlwaysOnTop = true
+
+                  local dotFrame = Instance.new("Frame", headDotGui)
+                  dotFrame.Name = "Dot"
+                  dotFrame.Size = UDim2.new(1, 0, 1, 0)
+                  dotFrame.BackgroundColor3 = v1.MainColor
+                  dotFrame.BorderSizePixel = 0
+                  Instance.new("UICorner", dotFrame).CornerRadius = UDim.new(1, 0)
+                else
+                  headDotGui.Adornee = head
+                  local dot = headDotGui:FindFirstChild("Dot")
+                  if dot then
+                    dot.BackgroundColor3 = v1.MainColor
+                  end
+                end
+              end
+            elseif espFolder:FindFirstChild("HeadDotGui") then
+              espFolder.HeadDotGui:Destroy()
+            end
+
+            -- Name ESP
+            if v1.NameESP then
+              local nameGui = espFolder:FindFirstChild("NameGui")
+              if not nameGui then
+                nameGui = Instance.new("BillboardGui", espFolder)
+                nameGui.Name = "NameGui"
+                nameGui.Adornee = humanoidRootPart
+                nameGui.Size = UDim2.new(0, 100, 0, 20)
+                nameGui.StudsOffset = Vector3.new(0, -3.5, 0)
+                nameGui.AlwaysOnTop = true
+
+                local nameText = Instance.new("TextLabel", nameGui)
+                nameText.Name = "NameText"
+                nameText.Size = UDim2.new(1, 0, 1, 0)
+                nameText.BackgroundTransparency = 1
+                nameText.Text = value.Name
+                nameText.TextColor3 = v1.MainColor
+                nameText.Font = Enum.Font.GothamBold
+                nameText.TextSize = 11
+                nameText.TextStrokeTransparency = 0.5
+              else
+                local nameText = nameGui:FindFirstChild("NameText")
+                if nameText then
+                  nameText.TextColor3 = v1.MainColor
+                end
+              end
+            elseif espFolder:FindFirstChild("NameGui") then
+              espFolder.NameGui:Destroy()
+            end
+          elseif character:FindFirstChild("ESP_Folder") then
+            character.ESP_Folder:Destroy()
+          end
+        end
+      end
+    end
+  end
+end)
