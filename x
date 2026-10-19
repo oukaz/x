@@ -144,6 +144,7 @@ textButton.MouseButton1Click:Connect(function()
   if v1.Enabled then
     textButton.Text = "CamLock: ON"
     textButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+    v8 = nil
   else
     textButton.Text = "CamLock: OFF"
     textButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
@@ -211,10 +212,7 @@ textButton2.MouseButton1Click:Connect(function()
   else
     textButton2.Text = "Sticky Camlock: OFF"
     textButton2.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-
-    if v1.Enabled then
-      v8 = nil
-    end
+    v8 = nil
   end
 end)
 
@@ -678,9 +676,8 @@ userInputService.InputBegan:Connect(function(input14, p3)
     textButton.BackgroundColor3 = v1.Enabled and Color3.fromRGB(0, 200, 100)
       or Color3.fromRGB(255, 60, 60)
 
-    if not v1.Enabled then
-      v8 = nil
-    end
+    -- Always clear target reference on key toggle so it fetches a new target
+    v8 = nil
   end
 end)
 
@@ -761,14 +758,21 @@ runService.RenderStepped:Connect(function()
   end
 
   if v1.Enabled then
-    local v23 = true
+    -- Find a target if we don't have one active
+    if v8 == nil or not f6(v8) then
+      -- If target died/invalidated while lock was active, automatically disable
+      if v8 ~= nil then
+        v1.Enabled = false
+        v8 = nil
+        textButton.Text = "CamLock: OFF"
+        textButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+        return
+      end
 
-    if v1.Sticky and f6(v8) then
-      v23 = false
-    end
-
-    if v23 then
       v8 = f7()
+      if v8 == nil then
+        return
+      end
     end
 
     if f6(v8) then
@@ -778,7 +782,6 @@ runService.RenderStepped:Connect(function()
           currentCamera.CFrame.Position, v24.Position + (v24.Velocity * v1.Prediction)
         )
 
-        -- Cubic curve mapping: Left is ultra-smooth, Middle is semi-smooth, Right is instant/blatant snap
         local t = math.clamp((v1.Smoothness - 0.01) / 0.49, 0, 1)
         local curvedT = t * t * t
         local alpha = 0.015 + (curvedT * 0.985)
