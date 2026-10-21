@@ -262,24 +262,21 @@ local function makeFrame(cornerGui)
   makeFrame2(UDim2.new(1, 0, 1, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(1, 1))
 end
 
--- Skeleton Drawing Management
-local skeletons = {}
+-- Drawing Management (Skeletons & Health Bars)
+local visualsData = {}
 
-local function createLine()
-  local line = Drawing.new("Line")
-  return line
-end
-
-local function removeSkeleton(skeleton)
-  for _, line in pairs(skeleton) do
-    line:Remove()
+local function removeVisuals(data)
+  if data.skeleton then
+    for _, line in pairs(data.skeleton) do line:Remove() end
   end
+  if data.healthBg then data.healthBg:Remove() end
+  if data.healthFill then data.healthFill:Remove() end
 end
 
 players.PlayerRemoving:Connect(function(plr)
-  if skeletons[plr] then
-    removeSkeleton(skeletons[plr])
-    skeletons[plr] = nil
+  if visualsData[plr] then
+    removeVisuals(visualsData[plr])
+    visualsData[plr] = nil
   end
 end)
 
@@ -296,9 +293,9 @@ runService.RenderStepped:Connect(function()
           if character:FindFirstChild("ESP_Folder") then
             character.ESP_Folder:Destroy()
           end
-          if skeletons[value] then
-            removeSkeleton(skeletons[value])
-            skeletons[value] = nil
+          if visualsData[value] then
+            removeVisuals(visualsData[value])
+            visualsData[value] = nil
           end
         else
           local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -360,47 +357,57 @@ runService.RenderStepped:Connect(function()
               espFolder.CornerGui:Destroy()
             end
 
-            -- Health Bar ESP
+            -- Ensure data tracking table exists for this player
+            local vData = visualsData[value]
+            if not vData then
+              vData = { skeleton = {} }
+              visualsData[value] = vData
+            end
+
+            -- Health Bar ESP (Drawing API - Screen-space perspective scaling)
             if v1.HealthBar then
-              local healthBarGui = espFolder:FindFirstChild("HealthBarGui")
-              if not healthBarGui then
-                healthBarGui = Instance.new("BillboardGui", espFolder)
-                healthBarGui.Name = "HealthBarGui"
-                healthBarGui.Adornee = humanoidRootPart
-                healthBarGui.Size = dynamicGuiSize
-                healthBarGui.AlwaysOnTop = true
-                healthBarGui.LightInfluence = 0
-
-                local bgBar = Instance.new("Frame", healthBarGui)
-                bgBar.Name = "BgBar"
-                bgBar.Size = UDim2.new(0, 4, 1, 0)
-                bgBar.Position = UDim2.new(-0.18, 0, 0, 0)
-                bgBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-                bgBar.BorderSizePixel = 0
-                Instance.new("UICorner", bgBar).CornerRadius = UDim.new(0, 1)
-
-                local fillBar = Instance.new("Frame", bgBar)
-                fillBar.Name = "FillBar"
-                fillBar.Size = UDim2.new(1, 0, 1, 0)
-                fillBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-                fillBar.BorderSizePixel = 0
-                Instance.new("UICorner", fillBar).CornerRadius = UDim.new(0, 1)
+              if not vData.healthBg then
+                vData.healthBg = Drawing.new("Square")
+                vData.healthBg.Filled = true
+                vData.healthBg.Color = Color3.fromRGB(20, 20, 20)
+                vData.healthBg.Thickness = 1
+              end
+              if not vData.healthFill then
+                vData.healthFill = Drawing.new("Square")
+                vData.healthFill.Filled = true
               end
 
-              healthBarGui.Adornee = humanoidRootPart
-              healthBarGui.Size = dynamicGuiSize
-              local bgBar = healthBarGui:FindFirstChild("BgBar")
-              if bgBar then
-                local fillBar = bgBar:FindFirstChild("FillBar")
-                if fillBar then
-                  local healthPercent = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
-                  fillBar.Size = UDim2.new(1, 0, healthPercent, 0)
-                  fillBar.Position = UDim2.new(0, 0, 1 - healthPercent, 0)
-                  fillBar.BackgroundColor3 = Color3.fromHSV(healthPercent * 0.35, 1, 1)
-                end
+              local topWorld = humanoidRootPart.Position + Vector3.new(0, 2.7, 0)
+              local bottomWorld = humanoidRootPart.Position - Vector3.new(0, 2.7, 0)
+              local topScreen, topOnScreen = camera:WorldToViewportPoint(topWorld)
+              local bottomScreen, bottomOnScreen = camera:WorldToViewportPoint(bottomWorld)
+
+              if (topOnScreen or bottomOnScreen) and topScreen.Z > 0 and bottomScreen.Z > 0 then
+                local boxHeight = math.abs(topScreen.Y - bottomScreen.Y)
+                local boxWidth = boxHeight * 0.55
+
+                local barX = topScreen.X - (boxWidth / 2) - 6
+                local barY = math.min(topScreen.Y, bottomScreen.Y)
+                local barHeight = boxHeight
+                local barWidth = 4
+
+                vData.healthBg.Position = Vector2.new(barX, barY)
+                vData.healthBg.Size = Vector2.new(barWidth, barHeight)
+                vData.healthBg.Visible = true
+
+                local healthPercent = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+                local fillHeight = barHeight * healthPercent
+                vData.healthFill.Position = Vector2.new(barX, barY + (barHeight - fillHeight))
+                vData.healthFill.Size = Vector2.new(barWidth, fillHeight)
+                vData.healthFill.Color = Color3.fromHSV(healthPercent * 0.35, 1, 1)
+                vData.healthFill.Visible = true
+              else
+                vData.healthBg.Visible = false
+                vData.healthFill.Visible = false
               end
-            elseif espFolder:FindFirstChild("HealthBarGui") then
-              espFolder.HealthBarGui:Destroy()
+            else
+              if vData.healthBg then vData.healthBg.Visible = false end
+              if vData.healthFill then vData.healthFill.Visible = false end
             end
 
             -- Head Dot ESP
@@ -436,10 +443,8 @@ runService.RenderStepped:Connect(function()
 
             -- Skeleton ESP (Drawing API)
             if v1.Skeleton then
-              local skeleton = skeletons[value]
-              if not skeleton then
-                skeleton = {}
-                skeletons[value] = skeleton
+              for _, line in pairs(vData.skeleton) do
+                line.Visible = false
               end
 
               local connections = {}
@@ -483,7 +488,6 @@ runService.RenderStepped:Connect(function()
                 local rightLeg = character:FindFirstChild("Right Leg")
 
                 if torso then
-                  -- Extended offsets so arms follow correctly and legs reach the feet/ground
                   local leftArmEnd = leftArm and (leftArm.CFrame * CFrame.new(0, -0.9, 0)).Position
                   local rightArmEnd = rightArm and (rightArm.CFrame * CFrame.new(0, -0.9, 0)).Position
                   local leftLegEnd = leftLeg and (leftLeg.CFrame * CFrame.new(0, -1.2, 0)).Position
@@ -503,8 +507,11 @@ runService.RenderStepped:Connect(function()
                 local itemA = connection[1]
                 local itemB = connection[2]
 
-                local line = skeleton[index] or createLine()
-                skeleton[index] = line
+                local line = vData.skeleton[index]
+                if not line then
+                  line = Drawing.new("Line")
+                  vData.skeleton[index] = line
+                end
 
                 if itemA and itemB then
                   local posA3D = (typeof(itemA) == "Instance" and itemA:IsA("BasePart")) and itemA.Position or itemA
@@ -517,7 +524,7 @@ runService.RenderStepped:Connect(function()
                   line.Thickness = 1.5
                   line.Transparency = 1
 
-                  if onScreenA and onScreenB then
+                  if onScreenA and onScreenB and posA.Z > 0 and posB.Z > 0 then
                     line.From = Vector2.new(posA.X, posA.Y)
                     line.To = Vector2.new(posB.X, posB.Y)
                     line.Visible = true
@@ -529,9 +536,8 @@ runService.RenderStepped:Connect(function()
                 end
               end
             else
-              if skeletons[value] then
-                removeSkeleton(skeletons[value])
-                skeletons[value] = nil
+              if vData.skeleton then
+                for _, line in pairs(vData.skeleton) do line.Visible = false end
               end
             end
 
@@ -570,16 +576,16 @@ runService.RenderStepped:Connect(function()
             if character:FindFirstChild("ESP_Folder") then
               character.ESP_Folder:Destroy()
             end
-            if skeletons[value] then
-              removeSkeleton(skeletons[value])
-              skeletons[value] = nil
+            if visualsData[value] then
+              removeVisuals(visualsData[value])
+              visualsData[value] = nil
             end
           end
         end
       else
-        if skeletons[value] then
-          removeSkeleton(skeletons[value])
-          skeletons[value] = nil
+        if visualsData[value] then
+          removeVisuals(visualsData[value])
+          visualsData[value] = nil
         end
       end
     end
