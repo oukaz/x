@@ -10,6 +10,7 @@ local v1 = {
   NameESP = false,
   HeadDot = false,
   HealthBar = false,
+  Skeleton = false,
   HealthChams = false,
   TeamCheck = false,
   MainColor = Color3.fromRGB(255, 0, 0),
@@ -21,7 +22,7 @@ universalESPNoLagAyz.Name = "UniversalESP_NoLag_ayz"
 universalESPNoLagAyz.ResetOnSpawn = false
 
 local instance = Instance.new("Frame", universalESPNoLagAyz)
-instance.Size = UDim2.new(0, 210, 0, 480)
+instance.Size = UDim2.new(0, 210, 0, 515)
 instance.Position = UDim2.new(0.05, 0, 0.25, 0)
 instance.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 instance.BorderSizePixel = 0
@@ -86,17 +87,18 @@ makeTextButton("Chams", 105, "Chams")
 makeTextButton("Name ESP", 140, "NameESP")
 makeTextButton("Head Dot", 175, "HeadDot")
 makeTextButton("Health Bar", 210, "HealthBar")
+makeTextButton("Skeleton ESP", 245, "Skeleton")
 
-makeTextLabel("SETTINGS", 255)
+makeTextLabel("SETTINGS", 285)
 
-makeTextButton("Health Based", 280, "HealthChams")
-makeTextButton("Team Check", 315, "TeamCheck")
+makeTextButton("Health Based", 310, "HealthChams")
+makeTextButton("Team Check", 345, "TeamCheck")
 
-makeTextLabel("COLORS", 360)
+makeTextLabel("COLORS", 390)
 
 local instance6 = Instance.new("Frame", instance)
 instance6.Size = UDim2.new(0.9, 0, 0, 65)
-instance6.Position = UDim2.new(0.05, 0, 0, 380)
+instance6.Position = UDim2.new(0.05, 0, 0, 410)
 instance6.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 
 Instance.new("UICorner", instance6)
@@ -260,9 +262,29 @@ local function makeFrame(cornerGui)
   makeFrame2(UDim2.new(1, 0, 1, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(1, 1))
 end
 
+-- Skeleton Drawing Management
+local skeletons = {}
+
+local function createLine()
+  local line = Drawing.new("Line")
+  return line
+end
+
+local function removeSkeleton(skeleton)
+  for _, line in pairs(skeleton) do
+    line:Remove()
+  end
+end
+
+players.PlayerRemoving:Connect(function(plr)
+  if skeletons[plr] then
+    removeSkeleton(skeletons[plr])
+    skeletons[plr] = nil
+  end
+end)
+
 runService.RenderStepped:Connect(function()
-  -- Calculate FOV scale factor to prevent culling/disappearing when zooming in with gun scopes
-  local fovScale = math.clamp(camera.FieldOfView / 70, 0.1, 1)
+  local fovScale = camera.FieldOfView / 70
   local dynamicGuiSize = UDim2.new(4 * fovScale, 0, 5.5 * fovScale, 0)
 
   for _, value in pairs(players:GetPlayers()) do
@@ -273,6 +295,10 @@ runService.RenderStepped:Connect(function()
         if v1.TeamCheck and value.Team == localPlayer.Team then
           if character:FindFirstChild("ESP_Folder") then
             character.ESP_Folder:Destroy()
+          end
+          if skeletons[value] then
+            removeSkeleton(skeletons[value])
+            skeletons[value] = nil
           end
         else
           local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -408,6 +434,107 @@ runService.RenderStepped:Connect(function()
               espFolder.HeadDotGui:Destroy()
             end
 
+            -- Skeleton ESP (Drawing API)
+            if v1.Skeleton then
+              local skeleton = skeletons[value]
+              if not skeleton then
+                skeleton = {}
+                skeletons[value] = skeleton
+              end
+
+              local connections = {}
+
+              if humanoid.RigType == Enum.HumanoidRigType.R15 then
+                local joints = {
+                  ["Head"] = character:FindFirstChild("Head"),
+                  ["UpperTorso"] = character:FindFirstChild("UpperTorso"),
+                  ["LowerTorso"] = character:FindFirstChild("LowerTorso"),
+                  ["LeftUpperArm"] = character:FindFirstChild("LeftUpperArm"),
+                  ["LeftLowerArm"] = character:FindFirstChild("LeftLowerArm"),
+                  ["LeftHand"] = character:FindFirstChild("LeftHand"),
+                  ["RightUpperArm"] = character:FindFirstChild("RightUpperArm"),
+                  ["RightLowerArm"] = character:FindFirstChild("RightLowerArm"),
+                  ["RightHand"] = character:FindFirstChild("RightHand"),
+                  ["LeftUpperLeg"] = character:FindFirstChild("LeftUpperLeg"),
+                  ["LeftLowerLeg"] = character:FindFirstChild("LeftLowerLeg"),
+                  ["RightUpperLeg"] = character:FindFirstChild("RightUpperLeg"),
+                  ["RightLowerLeg"] = character:FindFirstChild("RightLowerLeg"),
+                }
+                connections = {
+                  { joints["Head"], joints["UpperTorso"] },
+                  { joints["UpperTorso"], joints["LowerTorso"] },
+                  { joints["LowerTorso"], joints["LeftUpperLeg"] },
+                  { joints["LeftUpperLeg"], joints["LeftLowerLeg"] },
+                  { joints["LowerTorso"], joints["RightUpperLeg"] },
+                  { joints["RightUpperLeg"], joints["RightLowerLeg"] },
+                  { joints["UpperTorso"], joints["LeftUpperArm"] },
+                  { joints["LeftUpperArm"], joints["LeftLowerArm"] },
+                  { joints["LeftLowerArm"], joints["LeftHand"] },
+                  { joints["UpperTorso"], joints["RightUpperArm"] },
+                  { joints["RightUpperArm"], joints["RightLowerArm"] },
+                  { joints["RightLowerArm"], joints["RightHand"] },
+                }
+              elseif humanoid.RigType == Enum.HumanoidRigType.R6 then
+                local head = character:FindFirstChild("Head")
+                local torso = character:FindFirstChild("Torso")
+                local leftArm = character:FindFirstChild("Left Arm")
+                local rightArm = character:FindFirstChild("Right Arm")
+                local leftLeg = character:FindFirstChild("Left Leg")
+                local rightLeg = character:FindFirstChild("Right Leg")
+
+                if torso then
+                  -- Extended offsets so arms follow correctly and legs reach the feet/ground
+                  local leftArmEnd = leftArm and (leftArm.CFrame * CFrame.new(0, -0.9, 0)).Position
+                  local rightArmEnd = rightArm and (rightArm.CFrame * CFrame.new(0, -0.9, 0)).Position
+                  local leftLegEnd = leftLeg and (leftLeg.CFrame * CFrame.new(0, -1.2, 0)).Position
+                  local rightLegEnd = rightLeg and (rightLeg.CFrame * CFrame.new(0, -1.2, 0)).Position
+
+                  connections = {
+                    { head, torso },
+                    { torso, leftArmEnd or leftArm },
+                    { torso, rightArmEnd or rightArm },
+                    { torso, leftLegEnd or leftLeg },
+                    { torso, rightLegEnd or rightLeg },
+                  }
+                end
+              end
+
+              for index, connection in ipairs(connections) do
+                local itemA = connection[1]
+                local itemB = connection[2]
+
+                local line = skeleton[index] or createLine()
+                skeleton[index] = line
+
+                if itemA and itemB then
+                  local posA3D = (typeof(itemA) == "Instance" and itemA:IsA("BasePart")) and itemA.Position or itemA
+                  local posB3D = (typeof(itemB) == "Instance" and itemB:IsA("BasePart")) and itemB.Position or itemB
+
+                  local posA, onScreenA = camera:WorldToViewportPoint(posA3D)
+                  local posB, onScreenB = camera:WorldToViewportPoint(posB3D)
+
+                  line.Color = v1.MainColor
+                  line.Thickness = 1.5
+                  line.Transparency = 1
+
+                  if onScreenA and onScreenB then
+                    line.From = Vector2.new(posA.X, posA.Y)
+                    line.To = Vector2.new(posB.X, posB.Y)
+                    line.Visible = true
+                  else
+                    line.Visible = false
+                  end
+                else
+                  line.Visible = false
+                end
+              end
+            else
+              if skeletons[value] then
+                removeSkeleton(skeletons[value])
+                skeletons[value] = nil
+              end
+            end
+
             -- Name ESP
             if v1.NameESP then
               local nameGui = espFolder:FindFirstChild("NameGui")
@@ -439,9 +566,20 @@ runService.RenderStepped:Connect(function()
             elseif espFolder:FindFirstChild("NameGui") then
               espFolder.NameGui:Destroy()
             end
-          elseif character:FindFirstChild("ESP_Folder") then
-            character.ESP_Folder:Destroy()
+          else
+            if character:FindFirstChild("ESP_Folder") then
+              character.ESP_Folder:Destroy()
+            end
+            if skeletons[value] then
+              removeSkeleton(skeletons[value])
+              skeletons[value] = nil
+            end
           end
+        end
+      else
+        if skeletons[value] then
+          removeSkeleton(skeletons[value])
+          skeletons[value] = nil
         end
       end
     end
