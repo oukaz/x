@@ -1,0 +1,305 @@
+-- Multi-Waypoint Manager with Custom Hotkeys & Clear All Feature
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local localPlayer = Players.LocalPlayer
+
+local waypointDatabase = {}
+local currentlyBindingIndex = nil 
+
+-- 1. Dictionary to clean up Roblox's text names into short digits
+local cleanKeyNames = {
+	["Zero"] = "0", ["One"] = "1", ["Two"] = "2", ["Three"] = "3", ["Four"] = "4",
+	["Five"] = "5", ["Six"] = "6", ["Seven"] = "7", ["Eight"] = "8", ["Nine"] = "9"
+}
+
+-- 2. Create Core Screen Container
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "WaypointDatabaseUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = CoreGui
+
+-- 3. Main Panel Frame (Slightly lengthened to 355 to perfectly fit the bottom button)
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 270, 0, 355)
+mainFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true 
+mainFrame.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 8)
+mainCorner.Parent = mainFrame
+
+-- Title Banner
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 30)
+titleLabel.Text = "WAYPOINT MANAGER [RCTRL]"
+titleLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+titleLabel.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+titleLabel.Font = Enum.Font.SourceSansBold
+titleLabel.TextSize = 14
+titleLabel.BorderSizePixel = 0
+titleLabel.Parent = mainFrame
+
+-- 4. Input Text Box
+local nameInput = Instance.new("TextBox")
+nameInput.Size = UDim2.new(1, -20, 0, 35)
+nameInput.Position = UDim2.new(0, 10, 0, 40)
+nameInput.PlaceholderText = "Enter Waypoint Name..."
+nameInput.Text = ""
+nameInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+nameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameInput.Font = Enum.Font.SourceSans
+nameInput.TextSize = 14
+nameInput.Parent = mainFrame
+
+local inputCorner = Instance.new("UICorner")
+inputCorner.CornerRadius = UDim.new(0, 4)
+inputCorner.Parent = nameInput
+
+-- 5. Save Button
+local saveButton = Instance.new("TextButton")
+saveButton.Size = UDim2.new(1, -20, 0, 35)
+saveButton.Position = UDim2.new(0, 10, 0, 85)
+saveButton.Text = "Set Waypoint"
+saveButton.BackgroundColor3 = Color3.fromRGB(40, 160, 80)
+saveButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+saveButton.Font = Enum.Font.SourceSansBold
+saveButton.TextSize = 16
+saveButton.Parent = mainFrame
+
+local saveCorner = Instance.new("UICorner")
+saveCorner.CornerRadius = UDim.new(0, 4)
+saveCorner.Parent = saveButton
+
+-- 6. Scrolling Frame
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(1, -20, 0, 180)
+scrollFrame.Position = UDim2.new(0, 10, 0, 130)
+scrollFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+scrollFrame.BorderSizePixel = 0
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollFrame.ScrollBarThickness = 6
+scrollFrame.Parent = mainFrame
+
+local scrollCorner = Instance.new("UICorner")
+scrollCorner.CornerRadius = UDim.new(0, 4)
+scrollCorner.Parent = scrollFrame
+
+local listLayout = Instance.new("UIListLayout")
+listLayout.Padding = UDim.new(0, 5)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Parent = scrollFrame
+
+-- 7. Red "Clear All" Button (Positioned cleanly under the scrolling list area)
+local clearAllButton = Instance.new("TextButton")
+clearAllButton.Size = UDim2.new(1, -20, 0, 30)
+clearAllButton.Position = UDim2.new(0, 10, 0, 315)
+clearAllButton.Text = "Clear All Waypoints"
+clearAllButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+clearAllButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+clearAllButton.Font = Enum.Font.SourceSansBold
+clearAllButton.TextSize = 14
+clearAllButton.Parent = mainFrame
+
+local clearCorner = Instance.new("UICorner")
+clearCorner.CornerRadius = UDim.new(0, 4)
+clearCorner.Parent = clearAllButton
+
+----------------------------------------------------
+-- UTILITY CORE FUNCTIONS
+----------------------------------------------------
+
+local function teleportTo(cframe)
+	local character = localPlayer.Character
+	if character and character:FindFirstChild("HumanoidRootPart") then
+		character.HumanoidRootPart.CFrame = cframe
+	end
+end
+
+local refreshWaypointList
+
+refreshWaypointList = function()
+	for _, child in ipairs(scrollFrame:GetChildren()) do
+		if child:IsA("Frame") then
+			child:Destroy()
+		end
+	end
+
+	for index, data in ipairs(waypointDatabase) do
+		local itemFrame = Instance.new("Frame")
+		itemFrame.Size = UDim2.new(1, -10, 0, 30)
+		itemFrame.BackgroundTransparency = 1
+		itemFrame.Parent = scrollFrame
+
+		-- A. Left-Aligned Hotkey Customization Box
+		local indexBox = Instance.new("TextButton")
+		indexBox.Size = UDim2.new(0, 25, 1, 0)
+		indexBox.Position = UDim2.new(0, 0, 0, 0)
+		
+		if data.CustomKey then
+			local rawName = data.CustomKey.Name
+			indexBox.Text = cleanKeyNames[rawName] or rawName
+		else
+			indexBox.Text = tostring(index)
+		end
+		
+		indexBox.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+		indexBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		indexBox.Font = Enum.Font.SourceSansBold
+		indexBox.TextSize = 14
+		indexBox.Parent = itemFrame
+
+		local indexCorner = Instance.new("UICorner")
+		indexCorner.CornerRadius = UDim.new(0, 4)
+		indexCorner.Parent = indexBox
+
+		indexBox.MouseButton1Click:Connect(function()
+			if currentlyBindingIndex == index then
+				currentlyBindingIndex = nil
+				if data.CustomKey then 
+					indexBox.Text = cleanKeyNames[data.CustomKey.Name] or data.CustomKey.Name 
+				else 
+					indexBox.Text = tostring(index) 
+				end
+				indexBox.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+			else
+				currentlyBindingIndex = index
+				indexBox.Text = "..."
+				indexBox.BackgroundColor3 = Color3.fromRGB(200, 140, 40)
+			end
+		end)
+
+		-- B. Main Load/Teleport Button
+		local loadItemButton = Instance.new("TextButton")
+		loadItemButton.Size = UDim2.new(1, -65, 1, 0)
+		loadItemButton.Position = UDim2.new(0, 30, 0, 0)
+		loadItemButton.Text = data.Name
+		loadItemButton.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+		loadItemButton.TextColor3 = Color3.fromRGB(230, 230, 230)
+		loadItemButton.Font = Enum.Font.SourceSans
+		loadItemButton.TextSize = 14
+		loadItemButton.Parent = itemFrame
+		
+		local itemCorner = Instance.new("UICorner")
+		itemCorner.CornerRadius = UDim.new(0, 4)
+		itemCorner.Parent = loadItemButton
+
+		loadItemButton.MouseButton1Click:Connect(function()
+			teleportTo(data.Frame)
+		end)
+
+		-- C. Red 'X' Delete Button
+		local deleteButton = Instance.new("TextButton")
+		deleteButton.Size = UDim2.new(0, 30, 1, 0)
+		deleteButton.Position = UDim2.new(1, -30, 0, 0)
+		deleteButton.Text = "X"
+		deleteButton.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
+		deleteButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		deleteButton.Font = Enum.Font.SourceSansBold
+		deleteButton.TextSize = 14
+		deleteButton.Parent = itemFrame
+
+		local delCorner = Instance.new("UICorner")
+		delCorner.CornerRadius = UDim.new(0, 4)
+		delCorner.Parent = deleteButton
+
+		deleteButton.MouseButton1Click:Connect(function()
+			if currentlyBindingIndex == index then currentlyBindingIndex = nil end
+			table.remove(waypointDatabase, index)
+			refreshWaypointList()
+		end)
+	end
+	
+	scrollFrame.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y)
+end
+
+----------------------------------------------------
+-- GLOBAL INPUT INTERACTION ROUTINES
+----------------------------------------------------
+
+local defaultNumberMap = {
+	[Enum.KeyCode.One] = 1, [Enum.KeyCode.Two] = 2, [Enum.KeyCode.Three] = 3,
+	[Enum.KeyCode.Four] = 4, [Enum.KeyCode.Five] = 5, [Enum.KeyCode.Six] = 6,
+	[Enum.KeyCode.Seven] = 7, [Enum.KeyCode.Eight] = 8, [Enum.KeyCode.Nine] = 9
+}
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+	if gameProcessedEvent then return end
+	
+	-- Toggle visibility with Right Control
+	if input.KeyCode == Enum.KeyCode.RightControl then
+		mainFrame.Visible = not mainFrame.Visible
+		return
+	end
+
+	if not mainFrame.Visible then return end
+
+	-- Intercept keypress if a box is currently in the gold binding state
+	if currentlyBindingIndex ~= nil then
+		local activeIndex = currentlyBindingIndex
+		if waypointDatabase[activeIndex] and input.KeyCode ~= Enum.KeyCode.Unknown then
+			waypointDatabase[activeIndex].CustomKey = input.KeyCode
+			currentlyBindingIndex = nil 
+			refreshWaypointList()
+		end
+		return
+	end
+
+	-- Execute Waypoint Hotkeys
+	for index, data in ipairs(waypointDatabase) do
+		if data.CustomKey then
+			if input.KeyCode == data.CustomKey then
+				teleportTo(data.Frame)
+				break
+			end
+		else
+			local defaultMatch = defaultNumberMap[input.KeyCode]
+			if defaultMatch and defaultMatch == index then
+				teleportTo(data.Frame)
+				break
+			end
+		end
+	end
+end)
+
+----------------------------------------------------
+-- BACKEND BUTTON RIGGING
+----------------------------------------------------
+
+saveButton.MouseButton1Click:Connect(function()
+	local text = nameInput.Text
+	if string.gsub(text, " ", "") == "" then 
+		nameInput.Text = "Invalid Name!"
+		task.wait(1)
+		nameInput.Text = ""
+		return 
+	end
+	
+	local character = localPlayer.Character
+	if character and character:FindFirstChild("HumanoidRootPart") then
+		local currentPosition = character.HumanoidRootPart.CFrame
+		
+		table.insert(waypointDatabase, {
+			Name = text,
+			Frame = currentPosition,
+			CustomKey = nil 
+		})
+		
+		nameInput.Text = ""
+		saveButton.Text = "Saved successfully!"
+		refreshWaypointList()
+		task.wait(1)
+		saveButton.Text = "Set Waypoint"
+	end
+end)
+
+-- Clear All Button Functionality
+clearAllButton.MouseButton1Click:Connect(function()
+	currentlyBindingIndex = nil
+	table.clear(waypointDatabase) -- Wipes out the data array memory instantly
+	refreshWaypointList()         -- Clears all visible list items from screen
+end)
