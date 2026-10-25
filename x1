@@ -1,25 +1,37 @@
 local players = game:GetService("Players")
 local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
+local coreGui = game:GetService("CoreGui")
 local camera = workspace.CurrentCamera
 local localPlayer = players.LocalPlayer
 
 local v1 = {
-  BoxESP = false,
-  Chams = false,
-  NameESP = false,
-  HeadDot = false,
-  HealthBar = false,
-  Skeleton = false,
-  HealthChams = false,
-  TeamCheck = false,
-  MainColor = Color3.fromRGB(255, 0, 0),
-  MenuKey = Enum.KeyCode.RightShift,
+	BoxESP = false,
+	Chams = false,
+	NameESP = false,
+	HeadDot = false,
+	HealthBar = false,
+	Skeleton = false,
+	HealthChams = false,
+	TeamCheck = false,
+	MainColor = Color3.fromRGB(255, 0, 0),
+	MenuKey = Enum.KeyCode.RightShift,
 }
 
-local universalESPNoLagAyz = Instance.new("ScreenGui", localPlayer:WaitForChild("PlayerGui"))
+local universalESPNoLagAyz = Instance.new("ScreenGui")
 universalESPNoLagAyz.Name = "UniversalESP_NoLag_ayz"
 universalESPNoLagAyz.ResetOnSpawn = false
+universalESPNoLagAyz.DisplayOrder = 999999
+universalESPNoLagAyz.IgnoreGuiInset = true
+
+if syn and syn.protect_gui then
+	syn.protect_gui(universalESPNoLagAyz)
+	universalESPNoLagAyz.Parent = coreGui
+elseif gethui then
+	universalESPNoLagAyz.Parent = gethui()
+else
+	universalESPNoLagAyz.Parent = coreGui
+end
 
 local instance = Instance.new("Frame", universalESPNoLagAyz)
 instance.Size = UDim2.new(0, 210, 0, 515)
@@ -39,45 +51,45 @@ instance2.Font = Enum.Font.GothamBold
 instance2.TextSize = 14
 
 local function makeTextLabel(text, p1)
-  local instance3 = Instance.new("TextLabel", instance)
-  instance3.Size = UDim2.new(0.9, 0, 0, 20)
-  instance3.Position = UDim2.new(0.05, 0, 0, p1)
-  instance3.BackgroundTransparency = 1
-  instance3.Text = text
-  instance3.TextColor3 = Color3.fromRGB(80, 80, 80)
-  instance3.Font = Enum.Font.GothamBold
-  instance3.TextSize = 10
-  instance3.TextXAlignment = Enum.TextXAlignment.Left
+	local instance3 = Instance.new("TextLabel", instance)
+	instance3.Size = UDim2.new(0.9, 0, 0, 20)
+	instance3.Position = UDim2.new(0.05, 0, 0, p1)
+	instance3.BackgroundTransparency = 1
+	instance3.Text = text
+	instance3.TextColor3 = Color3.fromRGB(80, 80, 80)
+	instance3.Font = Enum.Font.GothamBold
+	instance3.TextSize = 10
+	instance3.TextXAlignment = Enum.TextXAlignment.Left
 
-  local instance4 = Instance.new("Frame", instance3)
-  instance4.Size = UDim2.new(1, 0, 0, 1)
-  instance4.Position = UDim2.new(0, 0, 1, 0)
-  instance4.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-  instance4.BorderSizePixel = 0
+	local instance4 = Instance.new("Frame", instance3)
+	instance4.Size = UDim2.new(1, 0, 0, 1)
+	instance4.Position = UDim2.new(0, 0, 1, 0)
+	instance4.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	instance4.BorderSizePixel = 0
 end
 
 local function makeTextButton(text2, p2, key)
-  local instance5 = Instance.new("TextButton", instance)
-  instance5.Size = UDim2.new(0.9, 0, 0, 30)
-  instance5.Position = UDim2.new(0.05, 0, 0, p2)
-  instance5.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-  instance5.Text = text2 .. ": OFF"
-  instance5.TextColor3 = Color3.fromRGB(180, 180, 180)
-  instance5.Font = Enum.Font.Gotham
-  instance5.TextSize = 11
+	local instance5 = Instance.new("TextButton", instance)
+	instance5.Size = UDim2.new(0.9, 0, 0, 30)
+	instance5.Position = UDim2.new(0.05, 0, 0, p2)
+	instance5.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	instance5.Text = text2 .. ": OFF"
+	instance5.TextColor3 = Color3.fromRGB(180, 180, 180)
+	instance5.Font = Enum.Font.Gotham
+	instance5.TextSize = 11
 
-  Instance.new("UICorner", instance5).CornerRadius = UDim.new(0, 6)
+	Instance.new("UICorner", instance5).CornerRadius = UDim.new(0, 6)
 
-  instance5.MouseButton1Click:Connect(function()
-    v1[key] = not v1[key]
+	instance5.MouseButton1Click:Connect(function()
+		v1[key] = not v1[key]
 
-    instance5.Text = text2 .. ": " .. (v1[key] and "ON" or "OFF")
+		instance5.Text = text2 .. ": " .. (v1[key] and "ON" or "OFF")
 
-    instance5.BackgroundColor3 = v1[key] and Color3.fromRGB(45, 100, 250)
-      or Color3.fromRGB(25, 25, 25)
+		instance5.BackgroundColor3 = v1[key] and Color3.fromRGB(45, 100, 250)
+			or Color3.fromRGB(25, 25, 25)
 
-    instance5.TextColor3 = v1[key] and Color3.new(1, 1, 1) or Color3.fromRGB(180, 180, 180)
-  end)
+		instance5.TextColor3 = v1[key] and Color3.new(1, 1, 1) or Color3.fromRGB(180, 180, 180)
+	end)
 end
 
 makeTextLabel("VISUALS", 45)
@@ -104,51 +116,62 @@ instance6.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Instance.new("UICorner", instance6)
 
 local function makeTextButton2(text3, color, index, p3)
-  local instance7 = Instance.new("Frame", instance6)
-  instance7.Size = UDim2.new(0.7, 0, 0, 4)
-  instance7.Position = UDim2.new(0.25, 0, 0, index + 8)
-  instance7.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	local instance7 = Instance.new("Frame", instance6)
+	instance7.Size = UDim2.new(0.7, 0, 0, 4)
+	instance7.Position = UDim2.new(0.25, 0, 0, index + 8)
+	instance7.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 
-  Instance.new("UICorner", instance7)
+	Instance.new("UICorner", instance7)
 
-  local instance8 = Instance.new("TextLabel", instance6)
-  instance8.Text = text3
-  instance8.Size = UDim2.new(0.15, 0, 0, 20)
-  instance8.Position = UDim2.new(0.05, 0, 0, index)
-  instance8.BackgroundTransparency = 1
-  instance8.TextColor3 = color
-  instance8.Font = Enum.Font.GothamBold
-  instance8.TextSize = 10
+	local instance8 = Instance.new("TextLabel", instance6)
+	instance8.Text = text3
+	instance8.Size = UDim2.new(0.15, 0, 0, 20)
+	instance8.Position = UDim2.new(0.05, 0, 0, index)
+	instance8.BackgroundTransparency = 1
+	instance8.TextColor3 = color
+	instance8.Font = Enum.Font.GothamBold
+	instance8.TextSize = 10
 
-  local instance9 = Instance.new("TextButton", instance7)
-  instance9.Size = UDim2.new(0, 10, 0, 10)
-  instance9.Position = UDim2.new(p3 == "R" and v1.MainColor.R or (p3 == "G" and v1.MainColor.G or v1.MainColor.B), -5, 0.5, -5)
-  instance9.BackgroundColor3 = color
-  instance9.Text = ""
+	local instance9 = Instance.new("TextButton", instance7)
+	instance9.Size = UDim2.new(0, 10, 0, 10)
+	
+	local defaultVal = v1.MainColor.R
+	if p3 == "G" then
+		defaultVal = v1.MainColor.G
+	elseif p3 == "B" then
+		defaultVal = v1.MainColor.B
+	end
+	
+	instance9.Position = UDim2.new(defaultVal, -5, 0.5, -5)
+	instance9.BackgroundColor3 = color
+	instance9.Text = ""
 
-  Instance.new("UICorner", instance9).CornerRadius = UDim.new(1, 0)
-  local v2 = false
-  instance9.MouseButton1Down:Connect(function() v2 = true end)
+	Instance.new("UICorner", instance9).CornerRadius = UDim.new(1, 0)
+	local v2 = false
+	instance9.MouseButton1Down:Connect(function() v2 = true end)
 
-  userInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-      v2 = false
-    end
-  end)
+	userInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			v2 = false
+		end
+	end)
 
-  runService.RenderStepped:Connect(function()
-    if v2 then
-      local v3 = math.clamp((userInputService:GetMouseLocation().X - instance7.AbsolutePosition.X)
-        / instance7.AbsoluteSize.X, 0, 1)
+	runService.RenderStepped:Connect(function()
+		if v2 then
+			local v3 = math.clamp(
+				(userInputService:GetMouseLocation().X - instance7.AbsolutePosition.X) / instance7.AbsoluteSize.X,
+				0,
+				1
+			)
 
-      instance9.Position = UDim2.new(v3, -5, 0.5, -5)
-      local r = p3 == "R" and v3 or v1.MainColor.R
-      local g = p3 == "G" and v3 or v1.MainColor.G
-      local b = p3 == "B" and v3 or v1.MainColor.B
-      
-      v1.MainColor = Color3.new(r, g, b)
-    end
-  end)
+			instance9.Position = UDim2.new(v3, -5, 0.5, -5)
+			local r = p3 == "R" and v3 or v1.MainColor.R
+			local g = p3 == "G" and v3 or v1.MainColor.G
+			local b = p3 == "B" and v3 or v1.MainColor.B
+			
+			v1.MainColor = Color3.new(r, g, b)
+		end
+	end)
 end
 
 makeTextButton2("R", Color3.fromRGB(255, 80, 80), 5, "R")
@@ -179,9 +202,9 @@ Instance.new("UICorner", keyButton).CornerRadius = UDim.new(0, 4)
 local bindingActive = false
 
 keyButton.MouseButton1Click:Connect(function()
-  bindingActive = true
-  keyButton.Text = "Press key..."
-  keyButton.TextColor3 = Color3.fromRGB(255, 200, 0)
+	bindingActive = true
+	keyButton.Text = "Press key..."
+	keyButton.TextColor3 = Color3.fromRGB(255, 200, 0)
 end)
 
 local creditsLabel = Instance.new("TextLabel", instance)
@@ -198,396 +221,430 @@ creditsLabel.TextXAlignment = Enum.TextXAlignment.Right
 local v4, position, position2
 
 instance.InputBegan:Connect(function(input2)
-  if input2.UserInputType == Enum.UserInputType.MouseButton1 then
-    v4 = true
-    position = input2.Position
-    position2 = instance.Position
-  end
+	if input2.UserInputType == Enum.UserInputType.MouseButton1 then
+		v4 = true
+		position = input2.Position
+		position2 = instance.Position
+	end
 end)
 
 userInputService.InputChanged:Connect(function(input3)
-  if v4 and input3.UserInputType == Enum.UserInputType.MouseMovement then
-    local v5 = input3.Position - position
+	if v4 and input3.UserInputType == Enum.UserInputType.MouseMovement then
+		local v5 = input3.Position - position
 
-    instance.Position = UDim2.new(
-      position2.X.Scale, position2.X.Offset + v5.X, position2.Y.Scale, position2.Y.Offset + v5.Y
-    )
-  end
+		instance.Position = UDim2.new(
+			position2.X.Scale,
+			position2.X.Offset + v5.X,
+			position2.Y.Scale,
+			position2.Y.Offset + v5.Y
+		)
+	end
 end)
 
 userInputService.InputEnded:Connect(function(input4)
-  if input4.UserInputType == Enum.UserInputType.MouseButton1 then
-    v4 = false
-  end
+	if input4.UserInputType == Enum.UserInputType.MouseButton1 then
+		v4 = false
+	end
 end)
 
 -- Unified Press-To-Bind and Menu Toggle
 userInputService.InputBegan:Connect(function(input5, gameProcessed)
-  if bindingActive then
-    if input5.UserInputType == Enum.UserInputType.Keyboard then
-      v1.MenuKey = input5.KeyCode
-      keyButton.Text = input5.KeyCode.Name
-      keyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-      bindingActive = false
-    end
-  else
-    if input5.KeyCode == v1.MenuKey then
-      instance.Visible = not instance.Visible
-    end
-  end
+	if bindingActive then
+		if input5.UserInputType == Enum.UserInputType.Keyboard then
+			v1.MenuKey = input5.KeyCode
+			keyButton.Text = input5.KeyCode.Name
+			keyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+			bindingActive = false
+		end
+	else
+		if input5.KeyCode == v1.MenuKey then
+			instance.Visible = not instance.Visible
+		end
+	end
 end)
 
 local function makeFrame(cornerGui)
-  local instance11 = Instance.new("Frame", cornerGui)
-  instance11.Size = UDim2.new(1, 0, 1, 0)
-  instance11.BackgroundTransparency = 1
+	local instance11 = Instance.new("Frame", cornerGui)
+	instance11.Size = UDim2.new(1, 0, 1, 0)
+	instance11.BackgroundTransparency = 1
 
-  local function makeFrame2(udim2, udim3, vector)
-    local instance12 = Instance.new("Frame", instance11)
-    instance12.Name = "BoxLine"
-    instance12.BackgroundColor3 = v1.MainColor
-    instance12.BorderSizePixel = 0
-    instance12.Position = udim2
-    instance12.Size = udim3
-    instance12.AnchorPoint = vector
-  end
+	local function makeFrame2(udim2, udim3, vector)
+		local instance12 = Instance.new("Frame", instance11)
+		instance12.Name = "BoxLine"
+		instance12.BackgroundColor3 = v1.MainColor
+		instance12.BorderSizePixel = 0
+		instance12.Position = udim2
+		instance12.Size = udim3
+		instance12.AnchorPoint = vector
+	end
 
-  makeFrame2(UDim2.new(0, 0, 0, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(0, 0))
-  makeFrame2(UDim2.new(0, 0, 0, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(0, 0))
-  makeFrame2(UDim2.new(1, 0, 0, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(1, 0))
-  makeFrame2(UDim2.new(1, 0, 0, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(1, 0))
-  makeFrame2(UDim2.new(0, 0, 1, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(0, 1))
-  makeFrame2(UDim2.new(0, 0, 1, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(0, 1))
-  makeFrame2(UDim2.new(1, 0, 1, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(1, 1))
-  makeFrame2(UDim2.new(1, 0, 1, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(1, 1))
+	makeFrame2(UDim2.new(0, 0, 0, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(0, 0))
+	makeFrame2(UDim2.new(0, 0, 0, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(0, 0))
+	makeFrame2(UDim2.new(1, 0, 0, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(1, 0))
+	makeFrame2(UDim2.new(1, 0, 0, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(1, 0))
+	makeFrame2(UDim2.new(0, 0, 1, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(0, 1))
+	makeFrame2(UDim2.new(0, 0, 1, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(0, 1))
+	makeFrame2(UDim2.new(1, 0, 1, 0), UDim2.new(0.15, 0, 0, 2), Vector2.new(1, 1))
+	makeFrame2(UDim2.new(1, 0, 1, 0), UDim2.new(0, 2, 0.15, 0), Vector2.new(1, 1))
 end
 
 -- Drawing Management (Skeletons & Health Bars)
 local visualsData = {}
 
 local function removeVisuals(data)
-  if data.skeleton then
-    for _, line in pairs(data.skeleton) do line:Remove() end
-  end
-  if data.healthBg then data.healthBg:Remove() end
-  if data.healthFill then data.healthFill:Remove() end
+	if data.skeleton then
+		for _, line in pairs(data.skeleton) do
+			line:Remove()
+		end
+	end
+	if data.healthBg then
+		data.healthBg:Remove()
+	end
+	if data.healthFill then
+		data.healthFill:Remove()
+	end
 end
 
 players.PlayerRemoving:Connect(function(plr)
-  if visualsData[plr] then
-    removeVisuals(visualsData[plr])
-    visualsData[plr] = nil
-  end
+	if visualsData[plr] then
+		removeVisuals(visualsData[plr])
+		visualsData[plr] = nil
+	end
 end)
 
 runService.RenderStepped:Connect(function()
-  local fovScale = camera.FieldOfView / 70
-  local dynamicGuiSize = UDim2.new(4 * fovScale, 0, 5.5 * fovScale, 0)
+	local fovScale = camera.FieldOfView / 70
+	local dynamicGuiSize = UDim2.new(4 * fovScale, 0, 5.5 * fovScale, 0)
 
-  for _, value in pairs(players:GetPlayers()) do
-    if value ~= localPlayer then
-      local character = value.Character
+	for _, value in pairs(players:GetPlayers()) do
+		if value ~= localPlayer then
+			local character = value.Character
 
-      if character then
-        if v1.TeamCheck and value.Team == localPlayer.Team then
-          if character:FindFirstChild("ESP_Folder") then
-            character.ESP_Folder:Destroy()
-          end
-          if visualsData[value] then
-            removeVisuals(visualsData[value])
-            visualsData[value] = nil
-          end
-        else
-          local humanoid = character:FindFirstChildOfClass("Humanoid")
-          local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+			if character then
+				if v1.TeamCheck and value.Team == localPlayer.Team then
+					if character:FindFirstChild("ESP_Folder") then
+						character.ESP_Folder:Destroy()
+					end
+					if visualsData[value] then
+						removeVisuals(visualsData[value])
+						visualsData[value] = nil
+					end
+				else
+					local humanoid = character:FindFirstChildOfClass("Humanoid")
+					local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-          if humanoid and humanoidRootPart and humanoid.Health > 0 then
-            local espFolder = character:FindFirstChild("ESP_Folder")
+					if humanoid and humanoidRootPart and humanoid.Health > 0 then
+						local espFolder = character:FindFirstChild("ESP_Folder")
 
-            if not espFolder then
-              espFolder = Instance.new("Folder", character)
-              espFolder.Name = "ESP_Folder"
-            end
+						if not espFolder then
+							espFolder = Instance.new("Folder", character)
+							espFolder.Name = "ESP_Folder"
+						end
 
-            -- Chams
-            if v1.Chams then
-              local highlight = espFolder:FindFirstChild("Highlight")
+						-- Chams
+						if v1.Chams then
+							local highlight = espFolder:FindFirstChild("Highlight")
 
-              if not highlight then
-                highlight = Instance.new("Highlight")
-                highlight.Name = "Highlight"
-                highlight.Adornee = character
-                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                highlight.Parent = espFolder
-              end
+							if not highlight then
+								highlight = Instance.new("Highlight")
+								highlight.Name = "Highlight"
+								highlight.Adornee = character
+								highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+								highlight.Parent = espFolder
+							end
 
-              highlight.FillColor = v1.HealthChams and Color3.fromHSV(math.clamp(
-                humanoid.Health / humanoid.MaxHealth, 0, 1
-              ) * 0.35, 1, 1) or v1.MainColor
+							local healthRatio = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+							highlight.FillColor = v1.HealthChams and Color3.fromHSV(healthRatio * 0.35, 1, 1) or v1.MainColor
 
-              highlight.OutlineColor = v1.MainColor
-              highlight.FillTransparency = 0.5
-              highlight.OutlineTransparency = 0
-            elseif espFolder:FindFirstChild("Highlight") then
-              espFolder.Highlight:Destroy()
-            end
+							highlight.OutlineColor = v1.MainColor
+							highlight.FillTransparency = 0.5
+							highlight.OutlineTransparency = 0
+						elseif espFolder:FindFirstChild("Highlight") then
+							espFolder.Highlight:Destroy()
+						end
 
-            -- Corner Box ESP
-            if v1.BoxESP then
-              local cornerGui2 = espFolder:FindFirstChild("CornerGui")
-              if not cornerGui2 then
-                cornerGui2 = Instance.new("BillboardGui", espFolder)
-                cornerGui2.Name = "CornerGui"
-                cornerGui2.Adornee = humanoidRootPart
-                cornerGui2.Size = dynamicGuiSize
-                cornerGui2.AlwaysOnTop = true
-                cornerGui2.LightInfluence = 0
+						-- Corner Box ESP
+						if v1.BoxESP then
+							local cornerGui2 = espFolder:FindFirstChild("CornerGui")
+							if not cornerGui2 then
+								cornerGui2 = Instance.new("BillboardGui", espFolder)
+								cornerGui2.Name = "CornerGui"
+								cornerGui2.Adornee = humanoidRootPart
+								cornerGui2.Size = dynamicGuiSize
+								cornerGui2.AlwaysOnTop = true
+								cornerGui2.LightInfluence = 0
 
-                makeFrame(cornerGui2)
-              else
-                cornerGui2.Adornee = humanoidRootPart
-                cornerGui2.Size = dynamicGuiSize
-                for _, element in pairs(cornerGui2:GetDescendants()) do
-                  if element:IsA("Frame") and element.Name == "BoxLine" then
-                    element.BackgroundColor3 = v1.MainColor
-                  end
-                end
-              end
-            elseif espFolder:FindFirstChild("CornerGui") then
-              espFolder.CornerGui:Destroy()
-            end
+								makeFrame(cornerGui2)
+							else
+								cornerGui2.Adornee = humanoidRootPart
+								cornerGui2.Size = dynamicGuiSize
+								for _, element in pairs(cornerGui2:GetDescendants()) do
+									if element:IsA("Frame") and element.Name == "BoxLine" then
+										element.BackgroundColor3 = v1.MainColor
+									end
+								end
+							end
+						elseif espFolder:FindFirstChild("CornerGui") then
+							espFolder.CornerGui:Destroy()
+						end
 
-            -- Ensure data tracking table exists for this player
-            local vData = visualsData[value]
-            if not vData then
-              vData = { skeleton = {} }
-              visualsData[value] = vData
-            end
+						-- Ensure data tracking table exists for this player
+						local vData = visualsData[value]
+						if not vData then
+							vData = { skeleton = {} }
+							visualsData[value] = vData
+						end
 
-            -- Health Bar ESP (Drawing API - Screen-space perspective scaling)
-            if v1.HealthBar then
-              if not vData.healthBg then
-                vData.healthBg = Drawing.new("Square")
-                vData.healthBg.Filled = true
-                vData.healthBg.Color = Color3.fromRGB(20, 20, 20)
-                vData.healthBg.Thickness = 1
-              end
-              if not vData.healthFill then
-                vData.healthFill = Drawing.new("Square")
-                vData.healthFill.Filled = true
-              end
+						-- Health Bar ESP (Drawing API - Screen-space perspective scaling)
+						if v1.HealthBar then
+							if not vData.healthBg then
+								vData.healthBg = Drawing.new("Square")
+								vData.healthBg.Filled = true
+								vData.healthBg.Color = Color3.fromRGB(20, 20, 20)
+								vData.healthBg.Thickness = 1
+							end
+							if not vData.healthFill then
+								vData.healthFill = Drawing.new("Square")
+								vData.healthFill.Filled = true
+							end
 
-              local topWorld = humanoidRootPart.Position + Vector3.new(0, 2.7, 0)
-              local bottomWorld = humanoidRootPart.Position - Vector3.new(0, 2.7, 0)
-              local topScreen, topOnScreen = camera:WorldToViewportPoint(topWorld)
-              local bottomScreen, bottomOnScreen = camera:WorldToViewportPoint(bottomWorld)
+							local topWorld = humanoidRootPart.Position + Vector3.new(0, 2.7, 0)
+							local bottomWorld = humanoidRootPart.Position - Vector3.new(0, 2.7, 0)
+							local topScreen, topOnScreen = camera:WorldToViewportPoint(topWorld)
+							local bottomScreen, bottomOnScreen = camera:WorldToViewportPoint(bottomWorld)
 
-              if (topOnScreen or bottomOnScreen) and topScreen.Z > 0 and bottomScreen.Z > 0 then
-                local boxHeight = math.abs(topScreen.Y - bottomScreen.Y)
-                local boxWidth = boxHeight * 0.55
+							if (topOnScreen or bottomOnScreen) and topScreen.Z > 0 and bottomScreen.Z > 0 then
+								local boxHeight = math.abs(topScreen.Y - bottomScreen.Y)
+								local boxWidth = boxHeight * 0.55
 
-                local barX = topScreen.X - (boxWidth / 2) - 6
-                local barY = math.min(topScreen.Y, bottomScreen.Y)
-                local barHeight = boxHeight
-                local barWidth = 4
+								local barX = topScreen.X - (boxWidth / 2) - 6
+								local barY = math.min(topScreen.Y, bottomScreen.Y)
+								local barHeight = boxHeight
+								local barWidth = 4
 
-                vData.healthBg.Position = Vector2.new(barX, barY)
-                vData.healthBg.Size = Vector2.new(barWidth, barHeight)
-                vData.healthBg.Visible = true
+								vData.healthBg.Position = Vector2.new(barX, barY)
+								vData.healthBg.Size = Vector2.new(barWidth, barHeight)
+								vData.healthBg.Visible = true
 
-                local healthPercent = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
-                local fillHeight = barHeight * healthPercent
-                vData.healthFill.Position = Vector2.new(barX, barY + (barHeight - fillHeight))
-                vData.healthFill.Size = Vector2.new(barWidth, fillHeight)
-                vData.healthFill.Color = Color3.fromHSV(healthPercent * 0.35, 1, 1)
-                vData.healthFill.Visible = true
-              else
-                vData.healthBg.Visible = false
-                vData.healthFill.Visible = false
-              end
-            else
-              if vData.healthBg then vData.healthBg.Visible = false end
-              if vData.healthFill then vData.healthFill.Visible = false end
-            end
+								local healthPercent = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+								local fillHeight = barHeight * healthPercent
+								vData.healthFill.Position = Vector2.new(barX, barY + (barHeight - fillHeight))
+								vData.healthFill.Size = Vector2.new(barWidth, fillHeight)
+								vData.healthFill.Color = Color3.fromHSV(healthPercent * 0.35, 1, 1)
+								vData.healthFill.Visible = true
+							else
+								vData.healthBg.Visible = false
+								vData.healthFill.Visible = false
+							end
+						else
+							if vData.healthBg then
+								vData.healthBg.Visible = false
+							end
+							if vData.healthFill then
+								vData.healthFill.Visible = false
+							end
+						end
 
-            -- Head Dot ESP
-            if v1.HeadDot then
-              local head = character:FindFirstChild("Head")
-              if head then
-                local headDotGui = espFolder:FindFirstChild("HeadDotGui")
-                if not headDotGui then
-                  headDotGui = Instance.new("BillboardGui", espFolder)
-                  headDotGui.Name = "HeadDotGui"
-                  headDotGui.Adornee = head
-                  headDotGui.Size = UDim2.new(0, 6, 0, 6)
-                  headDotGui.AlwaysOnTop = true
-                  headDotGui.LightInfluence = 0
+						-- Head Dot ESP
+						if v1.HeadDot then
+							local head = character:FindFirstChild("Head")
+							if head then
+								local headDotGui = espFolder:FindFirstChild("HeadDotGui")
+								if not headDotGui then
+									headDotGui = Instance.new("BillboardGui", espFolder)
+									headDotGui.Name = "HeadDotGui"
+									headDotGui.Adornee = head
+									headDotGui.Size = UDim2.new(0, 6, 0, 6)
+									headDotGui.AlwaysOnTop = true
+									headDotGui.LightInfluence = 0
 
-                  local dotFrame = Instance.new("Frame", headDotGui)
-                  dotFrame.Name = "Dot"
-                  dotFrame.Size = UDim2.new(1, 0, 1, 0)
-                  dotFrame.BackgroundColor3 = v1.MainColor
-                  dotFrame.BorderSizePixel = 0
-                  Instance.new("UICorner", dotFrame).CornerRadius = UDim.new(1, 0)
-                else
-                  headDotGui.Adornee = head
-                  local dot = headDotGui:FindFirstChild("Dot")
-                  if dot then
-                    dot.BackgroundColor3 = v1.MainColor
-                  end
-                end
-              end
-            elseif espFolder:FindFirstChild("HeadDotGui") then
-              espFolder.HeadDotGui:Destroy()
-            end
+									local dotFrame = Instance.new("Frame", headDotGui)
+									dotFrame.Name = "Dot"
+									dotFrame.Size = UDim2.new(1, 0, 1, 0)
+									dotFrame.BackgroundColor3 = v1.MainColor
+									dotFrame.BorderSizePixel = 0
+									Instance.new("UICorner", dotFrame).CornerRadius = UDim.new(1, 0)
+								else
+									headDotGui.Adornee = head
+									local dot = headDotGui:FindFirstChild("Dot")
+									if dot then
+										dot.BackgroundColor3 = v1.MainColor
+									end
+								end
+							end
+						elseif espFolder:FindFirstChild("HeadDotGui") then
+							espFolder.HeadDotGui:Destroy()
+						end
 
-            -- Skeleton ESP (Drawing API)
-            if v1.Skeleton then
-              for _, line in pairs(vData.skeleton) do
-                line.Visible = false
-              end
+						-- Skeleton ESP (Drawing API)
+						if v1.Skeleton then
+							for _, line in pairs(vData.skeleton) do
+								line.Visible = false
+							end
 
-              local connections = {}
+							local connections = {}
 
-              if humanoid.RigType == Enum.HumanoidRigType.R15 then
-                local joints = {
-                  ["Head"] = character:FindFirstChild("Head"),
-                  ["UpperTorso"] = character:FindFirstChild("UpperTorso"),
-                  ["LowerTorso"] = character:FindFirstChild("LowerTorso"),
-                  ["LeftUpperArm"] = character:FindFirstChild("LeftUpperArm"),
-                  ["LeftLowerArm"] = character:FindFirstChild("LeftLowerArm"),
-                  ["LeftHand"] = character:FindFirstChild("LeftHand"),
-                  ["RightUpperArm"] = character:FindFirstChild("RightUpperArm"),
-                  ["RightLowerArm"] = character:FindFirstChild("RightLowerArm"),
-                  ["RightHand"] = character:FindFirstChild("RightHand"),
-                  ["LeftUpperLeg"] = character:FindFirstChild("LeftUpperLeg"),
-                  ["LeftLowerLeg"] = character:FindFirstChild("LeftLowerLeg"),
-                  ["RightUpperLeg"] = character:FindFirstChild("RightUpperLeg"),
-                  ["RightLowerLeg"] = character:FindFirstChild("RightLowerLeg"),
-                }
-                connections = {
-                  { joints["Head"], joints["UpperTorso"] },
-                  { joints["UpperTorso"], joints["LowerTorso"] },
-                  { joints["LowerTorso"], joints["LeftUpperLeg"] },
-                  { joints["LeftUpperLeg"], joints["LeftLowerLeg"] },
-                  { joints["LowerTorso"], joints["RightUpperLeg"] },
-                  { joints["RightUpperLeg"], joints["RightLowerLeg"] },
-                  { joints["UpperTorso"], joints["LeftUpperArm"] },
-                  { joints["LeftUpperArm"], joints["LeftLowerArm"] },
-                  { joints["LeftLowerArm"], joints["LeftHand"] },
-                  { joints["UpperTorso"], joints["RightUpperArm"] },
-                  { joints["RightUpperArm"], joints["RightLowerArm"] },
-                  { joints["RightLowerArm"], joints["RightHand"] },
-                }
-              elseif humanoid.RigType == Enum.HumanoidRigType.R6 then
-                local head = character:FindFirstChild("Head")
-                local torso = character:FindFirstChild("Torso")
-                local leftArm = character:FindFirstChild("Left Arm")
-                local rightArm = character:FindFirstChild("Right Arm")
-                local leftLeg = character:FindFirstChild("Left Leg")
-                local rightLeg = character:FindFirstChild("Right Leg")
+							if humanoid.RigType == Enum.HumanoidRigType.R15 then
+								local joints = {
+									["Head"] = character:FindFirstChild("Head"),
+									["UpperTorso"] = character:FindFirstChild("UpperTorso"),
+									["LowerTorso"] = character:FindFirstChild("LowerTorso"),
+									["LeftUpperArm"] = character:FindFirstChild("LeftUpperArm"),
+									["LeftLowerArm"] = character:FindFirstChild("LeftLowerArm"),
+									["LeftHand"] = character:FindFirstChild("LeftHand"),
+									["RightUpperArm"] = character:FindFirstChild("RightUpperArm"),
+									["RightLowerArm"] = character:FindFirstChild("RightLowerArm"),
+									["RightHand"] = character:FindFirstChild("RightHand"),
+									["LeftUpperLeg"] = character:FindFirstChild("LeftUpperLeg"),
+									["LeftLowerLeg"] = character:FindFirstChild("LeftLowerLeg"),
+									["RightUpperLeg"] = character:FindFirstChild("RightUpperLeg"),
+									["RightLowerLeg"] = character:FindFirstChild("RightLowerLeg"),
+								}
 
-                if torso then
-                  local leftArmEnd = leftArm and (leftArm.CFrame * CFrame.new(0, -0.9, 0)).Position
-                  local rightArmEnd = rightArm and (rightArm.CFrame * CFrame.new(0, -0.9, 0)).Position
-                  local leftLegEnd = leftLeg and (leftLeg.CFrame * CFrame.new(0, -1.2, 0)).Position
-                  local rightLegEnd = rightLeg and (rightLeg.CFrame * CFrame.new(0, -1.2, 0)).Position
+								local leftFoot = character:FindFirstChild("LeftFoot")
+								local rightFoot = character:FindFirstChild("RightFoot")
+								
+								local leftFootEnd
+								if leftFoot then
+									leftFootEnd = (leftFoot.CFrame * CFrame.new(0, -0.5, 0)).Position
+								elseif joints["LeftLowerLeg"] then
+									leftFootEnd = (joints["LeftLowerLeg"].CFrame * CFrame.new(0, -1, 0)).Position
+								end
 
-                  connections = {
-                    { head, torso },
-                    { torso, leftArmEnd or leftArm },
-                    { torso, rightArmEnd or rightArm },
-                    { torso, leftLegEnd or leftLeg },
-                    { torso, rightLegEnd or rightLeg },
-                  }
-                end
-              end
+								local rightFootEnd
+								if rightFoot then
+									rightFootEnd = (rightFoot.CFrame * CFrame.new(0, -0.5, 0)).Position
+								elseif joints["RightLowerLeg"] then
+									rightFootEnd = (joints["RightLowerLeg"].CFrame * CFrame.new(0, -1, 0)).Position
+								end
 
-              for index, connection in ipairs(connections) do
-                local itemA = connection[1]
-                local itemB = connection[2]
+								connections = {
+									{ joints["Head"], joints["UpperTorso"] },
+									{ joints["UpperTorso"], joints["LowerTorso"] },
+									{ joints["LowerTorso"], joints["LeftUpperLeg"] },
+									{ joints["LeftUpperLeg"], joints["LeftLowerLeg"] },
+									{ joints["LeftLowerLeg"], leftFootEnd },
+									{ joints["LowerTorso"], joints["RightUpperLeg"] },
+									{ joints["RightUpperLeg"], joints["RightLowerLeg"] },
+									{ joints["RightLowerLeg"], rightFootEnd },
+									{ joints["UpperTorso"], joints["LeftUpperArm"] },
+									{ joints["LeftUpperArm"], joints["LeftLowerArm"] },
+									{ joints["LeftLowerArm"], joints["LeftHand"] },
+									{ joints["UpperTorso"], joints["RightUpperArm"] },
+									{ joints["RightUpperArm"], joints["RightLowerArm"] },
+									{ joints["RightLowerArm"], joints["RightHand"] },
+								}
+							elseif humanoid.RigType == Enum.HumanoidRigType.R6 then
+								local head = character:FindFirstChild("Head")
+								local torso = character:FindFirstChild("Torso")
+								local leftArm = character:FindFirstChild("Left Arm")
+								local rightArm = character:FindFirstChild("Right Arm")
+								local leftLeg = character:FindFirstChild("Left Leg")
+								local rightLeg = character:FindFirstChild("Right Leg")
 
-                local line = vData.skeleton[index]
-                if not line then
-                  line = Drawing.new("Line")
-                  vData.skeleton[index] = line
-                end
+								if torso then
+									local leftArmEnd = leftArm and (leftArm.CFrame * CFrame.new(0, -0.9, 0)).Position
+									local rightArmEnd = rightArm and (rightArm.CFrame * CFrame.new(0, -0.9, 0)).Position
+									local leftLegEnd = leftLeg and (leftLeg.CFrame * CFrame.new(0, -1.2, 0)).Position
+									local rightLegEnd = rightLeg and (rightLeg.CFrame * CFrame.new(0, -1.2, 0)).Position
 
-                if itemA and itemB then
-                  local posA3D = (typeof(itemA) == "Instance" and itemA:IsA("BasePart")) and itemA.Position or itemA
-                  local posB3D = (typeof(itemB) == "Instance" and itemB:IsA("BasePart")) and itemB.Position or itemB
+									connections = {
+										{ head, torso },
+										{ torso, leftArmEnd or leftArm },
+										{ torso, rightArmEnd or rightArm },
+										{ torso, leftLegEnd or leftLeg },
+										{ torso, rightLegEnd or rightLeg },
+									}
+								end
+							end
 
-                  local posA, onScreenA = camera:WorldToViewportPoint(posA3D)
-                  local posB, onScreenB = camera:WorldToViewportPoint(posB3D)
+							for index, connection in ipairs(connections) do
+								local itemA = connection[1]
+								local itemB = connection[2]
 
-                  line.Color = v1.MainColor
-                  line.Thickness = 1.5
-                  line.Transparency = 1
+								local line = vData.skeleton[index]
+								if not line then
+									line = Drawing.new("Line")
+									vData.skeleton[index] = line
+								end
 
-                  if onScreenA and onScreenB and posA.Z > 0 and posB.Z > 0 then
-                    line.From = Vector2.new(posA.X, posA.Y)
-                    line.To = Vector2.new(posB.X, posB.Y)
-                    line.Visible = true
-                  else
-                    line.Visible = false
-                  end
-                else
-                  line.Visible = false
-                end
-              end
-            else
-              if vData.skeleton then
-                for _, line in pairs(vData.skeleton) do line.Visible = false end
-              end
-            end
+								if itemA and itemB then
+									local posA3D = (typeof(itemA) == "Instance" and itemA:IsA("BasePart")) and itemA.Position or itemA
+									local posB3D = (typeof(itemB) == "Instance" and itemB:IsA("BasePart")) and itemB.Position or itemB
 
-            -- Name ESP
-            if v1.NameESP then
-              local nameGui = espFolder:FindFirstChild("NameGui")
-              if not nameGui then
-                nameGui = Instance.new("BillboardGui", espFolder)
-                nameGui.Name = "NameGui"
-                nameGui.Adornee = humanoidRootPart
-                nameGui.Size = UDim2.new(0, 100, 0, 20)
-                nameGui.StudsOffset = Vector3.new(0, -3.5, 0)
-                nameGui.AlwaysOnTop = true
-                nameGui.LightInfluence = 0
+									local posA, onScreenA = camera:WorldToViewportPoint(posA3D)
+									local posB, onScreenB = camera:WorldToViewportPoint(posB3D)
 
-                local nameText = Instance.new("TextLabel", nameGui)
-                nameText.Name = "NameText"
-                nameText.Size = UDim2.new(1, 0, 1, 0)
-                nameText.BackgroundTransparency = 1
-                nameText.Text = value.Name
-                nameText.TextColor3 = v1.MainColor
-                nameText.Font = Enum.Font.GothamBold
-                nameText.TextSize = 11
-                nameText.TextStrokeTransparency = 0.5
-              else
-                nameGui.Adornee = humanoidRootPart
-                local nameText = nameGui:FindFirstChild("NameText")
-                if nameText then
-                  nameText.TextColor3 = v1.MainColor
-                end
-              end
-            elseif espFolder:FindFirstChild("NameGui") then
-              espFolder.NameGui:Destroy()
-            end
-          else
-            if character:FindFirstChild("ESP_Folder") then
-              character.ESP_Folder:Destroy()
-            end
-            if visualsData[value] then
-              removeVisuals(visualsData[value])
-              visualsData[value] = nil
-            end
-          end
-        end
-      else
-        if visualsData[value] then
-          removeVisuals(visualsData[value])
-          visualsData[value] = nil
-        end
-      end
-    end
-  end
+									line.Color = v1.MainColor
+									line.Thickness = 1.5
+									line.Transparency = 1
+
+									if onScreenA and onScreenB and posA.Z > 0 and posB.Z > 0 then
+										line.From = Vector2.new(posA.X, posA.Y)
+										line.To = Vector2.new(posB.X, posB.Y)
+										line.Visible = true
+									else
+										line.Visible = false
+									end
+								else
+									line.Visible = false
+								end
+							end
+						else
+							if vData.skeleton then
+								for _, line in pairs(vData.skeleton) do
+									line.Visible = false
+								end
+							end
+						end
+
+						-- Name ESP
+						if v1.NameESP then
+							local nameGui = espFolder:FindFirstChild("NameGui")
+							if not nameGui then
+								nameGui = Instance.new("BillboardGui", espFolder)
+								nameGui.Name = "NameGui"
+								nameGui.Adornee = humanoidRootPart
+								nameGui.Size = UDim2.new(0, 100, 0, 20)
+								nameGui.StudsOffset = Vector3.new(0, -3.5, 0)
+								nameGui.AlwaysOnTop = true
+								nameGui.LightInfluence = 0
+
+								local nameText = Instance.new("TextLabel", nameGui)
+								nameText.Name = "NameText"
+								nameText.Size = UDim2.new(1, 0, 1, 0)
+								nameText.BackgroundTransparency = 1
+								nameText.Text = value.Name
+								nameText.TextColor3 = v1.MainColor
+								nameText.Font = Enum.Font.GothamBold
+								nameText.TextSize = 11
+								nameText.TextStrokeTransparency = 0.5
+							else
+								nameGui.Adornee = humanoidRootPart
+								local nameText = nameGui:FindFirstChild("NameText")
+								if nameText then
+									nameText.TextColor3 = v1.MainColor
+								end
+							end
+						elseif espFolder:FindFirstChild("NameGui") then
+							espFolder.NameGui:Destroy()
+						end
+					else
+						if character:FindFirstChild("ESP_Folder") then
+							character.ESP_Folder:Destroy()
+						end
+						if visualsData[value] then
+							removeVisuals(visualsData[value])
+							visualsData[value] = nil
+						end
+					end
+				end
+			else
+				if visualsData[value] then
+					removeVisuals(visualsData[value])
+					visualsData[value] = nil
+				end
+			end
+		end
+	end
 end)
