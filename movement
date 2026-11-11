@@ -1,0 +1,190 @@
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+local Enabled = false
+local Connection = nil
+local CurrentSpeed = 16 -- Default walk speed in studs per second
+
+-- Infinite Jump State
+local InfiniteJumpEnabled = false
+
+-- ==========================================
+-- CREATE GUI
+-- ==========================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "CFrameSpeedGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 220, 0, 200) -- Expanded height to fit the new button
+MainFrame.Position = UDim2.new(0, 50, 0, 200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, 0, 0, 35)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "CFrame Speed & InfJump"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 14
+TitleLabel.Parent = MainFrame
+
+-- Speed Input Box
+local SpeedBox = Instance.new("TextBox")
+SpeedBox.Size = UDim2.new(0, 180, 0, 30)
+SpeedBox.Position = UDim2.new(0.5, -90, 0, 40)
+SpeedBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+SpeedBox.BorderSizePixel = 0
+SpeedBox.Font = Enum.Font.Gotham
+SpeedBox.PlaceholderText = "Studs per second"
+SpeedBox.Text = tostring(CurrentSpeed)
+SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedBox.TextSize = 14
+SpeedBox.Parent = MainFrame
+
+local BoxCorner = Instance.new("UICorner")
+BoxCorner.CornerRadius = UDim.new(0, 6)
+BoxCorner.Parent = SpeedBox
+
+-- Speed Toggle Button
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 180, 0, 30)
+ToggleButton.Position = UDim2.new(0.5, -90, 0, 80)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Text = "Speed: OFF (Press C)"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 13
+ToggleButton.Parent = MainFrame
+
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 6)
+BtnCorner.Parent = ToggleButton
+
+-- Infinite Jump Toggle Button
+local JumpToggleButton = Instance.new("TextButton")
+JumpToggleButton.Size = UDim2.new(0, 180, 0, 30)
+JumpToggleButton.Position = UDim2.new(0.5, -90, 0, 120)
+JumpToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+JumpToggleButton.BorderSizePixel = 0
+JumpToggleButton.Font = Enum.Font.GothamBold
+JumpToggleButton.Text = "InfJump: OFF"
+JumpToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+JumpToggleButton.TextSize = 13
+JumpToggleButton.Parent = MainFrame
+
+local JumpBtnCorner = Instance.new("UICorner")
+JumpBtnCorner.CornerRadius = UDim.new(0, 6)
+JumpBtnCorner.Parent = JumpToggleButton
+
+-- Footer / Info Label
+local InfoLabel = Instance.new("TextLabel")
+InfoLabel.Size = UDim2.new(1, 0, 0, 25)
+InfoLabel.Position = UDim2.new(0, 0, 0, 160)
+InfoLabel.BackgroundTransparency = 1
+InfoLabel.Font = Enum.Font.Gotham
+InfoLabel.Text = "RightCtrl to hide UI"
+InfoLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+InfoLabel.TextSize = 11
+InfoLabel.Parent = MainFrame
+
+-- ==========================================
+-- MOVEMENT & JUMP LOGIC
+-- ==========================================
+local function startCFrameSpeed()
+	Connection = RunService.RenderStepped:Connect(function(dt)
+		local character = Player.Character
+		if not character then return end
+
+		local rootPart = character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if not rootPart or not humanoid then return end
+
+		if humanoid.MoveDirection.Magnitude > 0 then
+			local moveVector = Vector3.new(humanoid.MoveDirection.X, 0, humanoid.MoveDirection.Z).Unit
+			rootPart.CFrame = rootPart.CFrame + (moveVector * (CurrentSpeed * dt))
+		end
+	end)
+end
+
+local function stopCFrameSpeed()
+	if Connection then
+		Connection:Disconnect()
+		Connection = nil
+	end
+end
+
+local function toggleSpeed()
+	Enabled = not Enabled
+	if Enabled then
+		startCFrameSpeed()
+		ToggleButton.Text = "Speed: ON"
+		ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+	else
+		stopCFrameSpeed()
+		ToggleButton.Text = "Speed: OFF"
+		ToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+	end
+end
+
+local function toggleInfiniteJump()
+	InfiniteJumpEnabled = not InfiniteJumpEnabled
+	if InfiniteJumpEnabled then
+		JumpToggleButton.Text = "InfJump: ON"
+		JumpToggleButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+	else
+		JumpToggleButton.Text = "InfJump: OFF"
+		JumpToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+	end
+end
+
+-- ==========================================
+-- EVENT LISTENERS
+-- ==========================================
+SpeedBox.FocusLost:Connect(function(enterPressed)
+	local num = tonumber(SpeedBox.Text)
+	if num then
+		CurrentSpeed = math.max(0, num)
+		SpeedBox.Text = tostring(CurrentSpeed)
+	else
+		SpeedBox.Text = tostring(CurrentSpeed)
+	end
+end)
+
+ToggleButton.MouseButton1Click:Connect(toggleSpeed)
+JumpToggleButton.MouseButton1Click:Connect(toggleInfiniteJump)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	
+	-- Handle Infinite Jump (Only triggers once per spacebar press)
+	if input.KeyCode == Enum.KeyCode.Space and InfiniteJumpEnabled then
+		local character = Player.Character
+		if character then
+			local humanoid = character:FindFirstChildOfClass("Humanoid")
+			if humanoid then
+				humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end
+		
+	-- Toggle speed with 'C'
+	elseif input.KeyCode == Enum.KeyCode.C then
+		toggleSpeed()
+		
+	-- Toggle UI visibility with 'Right Control'
+	elseif input.KeyCode == Enum.KeyCode.RightControl then
+		MainFrame.Visible = not MainFrame.Visible
+	end
+end)
